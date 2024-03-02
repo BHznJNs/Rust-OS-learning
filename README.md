@@ -1,5 +1,8 @@
 # Rust Operating System Learning
 
-Create an operating system with Rust.
+Learn to create an operating system with Rust.
 
+- - -
 
+Learning reference:
+- [Writing an OS in Rust](https://os.phil-opp.com/)

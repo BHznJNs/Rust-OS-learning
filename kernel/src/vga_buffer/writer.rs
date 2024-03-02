@@ -1,4 +1,5 @@
 use core::fmt::{self, Write};
+use spin::Mutex;
 use super::color::{Color, ColorCode};
 use super::buffer::{Buffer, ScreenChar};
 
@@ -68,7 +69,7 @@ impl fmt::Write for Writer {
 
 // --- --- --- --- --- ---
 
-static mut GLOBAL_WRITER: Option<Writer> = None;
+static mut GLOBAL_WRITER: Option<Mutex<Writer>> = None;
 pub struct GlobalWriter;
 
 impl GlobalWriter {
@@ -81,13 +82,13 @@ impl GlobalWriter {
             ),
             buffer: Buffer::new(),
         };
-        unsafe { GLOBAL_WRITER = Some(writer_inst) }
+        unsafe { GLOBAL_WRITER = Some(Mutex::new(writer_inst)) }
     }
 
     pub fn print(args: fmt::Arguments) {
         let writer = unsafe {
-            GLOBAL_WRITER.as_mut().unwrap()
+            GLOBAL_WRITER.as_ref().unwrap()
         };
-        writer.write_fmt(args);
+        writer.lock().write_fmt(args).expect("Unexpected IO error");
     }
 }

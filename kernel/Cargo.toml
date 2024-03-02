@@ -1,0 +1,12 @@
+[package]
+name = "kernel"
+version = "0.1.0"
+edition = "2021"
+
+[package.metadata.bootimage]
+build-command = ["build"] # cargo bootimage --target ./x86_64-kernels.json
+run-command = ["qemu-system-x86_64", "-drive", "format=raw,file={}"]
+
+[dependencies]
+bootloader = "0.9.7"
+x86_64 = "0.14.1"

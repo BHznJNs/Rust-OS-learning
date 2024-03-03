@@ -91,4 +91,12 @@ impl GlobalWriter {
         };
         writer.lock().write_fmt(args).expect("Unexpected IO error");
     }
+
+    pub fn get_ch(row: usize, col: usize) -> ScreenChar {
+        let writer = unsafe {
+            GLOBAL_WRITER.as_ref().unwrap()
+        };
+        let ch = writer.lock().buffer.get(row, col);
+        return ch;
+    }
 }

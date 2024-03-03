@@ -1,5 +1,5 @@
 use core::panic::PanicInfo;
-use super::GlobalWriter;
+use super::vga_buffer::GlobalWriter;
 use super::exit::{exit_qemu, QemuExitCode};
 
 #[cfg(not(test))]

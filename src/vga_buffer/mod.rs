@@ -17,10 +17,12 @@ macro_rules! println {
 
 #[test_case]
 fn test_println_simple() {
+    GlobalWriter::init();
     println!("test_println_simple output");
 }
 #[test_case]
 fn test_println_many() {
+    GlobalWriter::init();
     for _ in 0..200 {
         println!("test_println_many output");
     }
@@ -28,6 +30,8 @@ fn test_println_many() {
 #[test_case]
 fn test_println_output() {
     use buffer::Buffer;
+
+    GlobalWriter::init();
 
     let s = "Some test string that fits on a single line";
     println!("{}", s);

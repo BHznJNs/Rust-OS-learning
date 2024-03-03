@@ -18,7 +18,6 @@ where
     }
 }
 
-#[cfg(test)]
 pub fn test_runner(tests: &[&dyn Testable]) {
     SerialController::init();
     serial_println!("Running {} tests", tests.len());

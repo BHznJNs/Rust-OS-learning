@@ -2,11 +2,24 @@ mod color;
 mod buffer;
 mod writer;
 
-pub use writer::GlobalWriter;
+use core::fmt;
+pub use writer::WRITER;
+
+pub fn _print(args: fmt::Arguments) {
+    use fmt::Write;
+    use x86_64::instructions::interrupts;
+
+    interrupts::without_interrupts(|| {
+        WRITER
+            .lock()
+            .write_fmt(args)
+            .expect("Unexpected IO error");
+    })
+}
 
 #[macro_export]
 macro_rules! print {
-    ($($arg:tt)*) => (GlobalWriter::print(format_args!($($arg)*)));
+    ($($arg:tt)*) => ($crate::vga_buffer::_print(format_args!($($arg)*)));
 }
 
 #[macro_export]
@@ -17,12 +30,10 @@ macro_rules! println {
 
 #[test_case]
 fn test_println_simple() {
-    GlobalWriter::init();
     println!("test_println_simple output");
 }
 #[test_case]
 fn test_println_many() {
-    GlobalWriter::init();
     for _ in 0..200 {
         println!("test_println_many output");
     }
@@ -30,13 +41,16 @@ fn test_println_many() {
 #[test_case]
 fn test_println_output() {
     use buffer::Buffer;
-
-    GlobalWriter::init();
+    use core::fmt::Write;
+    use x86_64::instructions::interrupts;
 
     let s = "Some test string that fits on a single line";
-    println!("{}", s);
-    for (i, c) in s.chars().enumerate() {
-        let ch = GlobalWriter::get_ch(Buffer::HEIGHT - 2, i);
-        assert_eq!(char::from(ch.ascii_character), c);
-    }
+    interrupts::without_interrupts(|| {
+        let mut writer = WRITER.lock();
+        writeln!(writer, "\n{}", s).expect("writeln failed");
+        for (i, c) in s.chars().enumerate() {
+            let screen_char = writer.buffer.get(Buffer::HEIGHT - 2, i);
+            assert_eq!(char::from(screen_char.ascii_character), c);
+        }
+    });
 }

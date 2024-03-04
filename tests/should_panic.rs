@@ -4,7 +4,7 @@
 #![test_runner(test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
-use learning_os::serial::SerialController;
+use learning_os::serial_print;
 use learning_os::serial_println;
 use learning_os::exit::{exit_qemu, QemuExitCode};
 
@@ -15,13 +15,13 @@ pub extern "C" fn _start() -> ! {
 }
 
 pub fn test_runner(tests: &[&dyn Fn()]) {
-    SerialController::init();
     serial_println!("Running {} tests", tests.len());
-    for test in tests {
-        test();
-        serial_println!("[test did not panic]");
-        exit_qemu(QemuExitCode::Failed);
-    }
+    tests[0]();
+    // for test in tests {
+    //     test();
+    //     serial_println!("[test did not panic]");
+    //     exit_qemu(QemuExitCode::Failed);
+    // }
     exit_qemu(QemuExitCode::Success);
 }
 

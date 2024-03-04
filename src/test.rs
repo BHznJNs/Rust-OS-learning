@@ -1,6 +1,5 @@
 use crate::serial_print;
 use crate::serial_println;
-use super::serial::SerialController;
 use super::exit;
 
 pub trait Testable {
@@ -19,7 +18,6 @@ where
 }
 
 pub fn test_runner(tests: &[&dyn Testable]) {
-    SerialController::init();
     serial_println!("Running {} tests", tests.len());
 
     for test in tests {

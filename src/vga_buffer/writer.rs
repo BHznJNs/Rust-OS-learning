@@ -1,12 +1,14 @@
-use core::fmt::{self, Write};
+use core::fmt;
+use lazy_static::lazy_static;
 use spin::Mutex;
+
 use super::color::{Color, ColorCode};
 use super::buffer::{Buffer, ScreenChar};
 
-struct Writer {
+pub struct Writer {
     column_position: usize,
     color_code: ColorCode,
-    buffer: &'static mut Buffer,
+    pub(super) buffer: &'static mut Buffer,
 }
 
 impl Writer {
@@ -66,15 +68,11 @@ impl fmt::Write for Writer {
     }
 }
 
-
 // --- --- --- --- --- ---
 
-static mut GLOBAL_WRITER: Option<Mutex<Writer>> = None;
-pub struct GlobalWriter;
-
-impl GlobalWriter {
-    pub fn init() {
-        let writer_inst = Writer {
+lazy_static! {
+    pub static ref WRITER: Mutex<Writer> = {
+        let writer = Writer {
             column_position: 0,
             color_code: ColorCode::new(
                 Color::Yellow,
@@ -82,21 +80,6 @@ impl GlobalWriter {
             ),
             buffer: Buffer::new(),
         };
-        unsafe { GLOBAL_WRITER = Some(Mutex::new(writer_inst)) }
-    }
-
-    pub fn print(args: fmt::Arguments) {
-        let writer = unsafe {
-            GLOBAL_WRITER.as_ref().unwrap()
-        };
-        writer.lock().write_fmt(args).expect("Unexpected IO error");
-    }
-
-    pub fn get_ch(row: usize, col: usize) -> ScreenChar {
-        let writer = unsafe {
-            GLOBAL_WRITER.as_ref().unwrap()
-        };
-        let ch = writer.lock().buffer.get(row, col);
-        return ch;
-    }
+        Mutex::new(writer)
+    };
 }
